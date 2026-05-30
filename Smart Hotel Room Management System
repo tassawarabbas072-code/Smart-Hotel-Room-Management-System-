@@ -2,11 +2,47 @@
 #include <string>
 #include <vector>
 #include <iomanip>
-#include <algorithm>
-#include <map>
 #include <cctype>
+#include <ctime>
 
 using namespace std;
+
+// =====================================================
+// DATE FUNCTION
+// =====================================================
+
+string getCurrentDate()
+{
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+
+    return to_string(ltm->tm_mday) + "/" +
+           to_string(ltm->tm_mon + 1) + "/" +
+           to_string(ltm->tm_year + 1900);
+}
+
+// =====================================================
+// DAY FUNCTION
+// =====================================================
+
+string getCurrentDay()
+{
+    string days[] =
+    {
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+    };
+
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+
+    return days[ltm->tm_wday];
+}
 
 // =========================================================
 //                  BASE CLASS : PERSON
@@ -14,6 +50,7 @@ using namespace std;
 class Person {
 
 protected:
+
     string name;
     string phone;
     string email;
@@ -31,26 +68,112 @@ public:
         city = "";
     }
 
+    // =====================================================
+    // NAME VALIDATION
+    // =====================================================
+    bool validName(string str) {
+
+        for (char c : str) {
+
+            if (!isalpha(c) && c != ' ')
+                return false;
+        }
+
+        return !str.empty();
+    }
+
+    // =====================================================
+    // PHONE VALIDATION
+    // =====================================================
+    bool validPhone(string str) {
+
+        if (str.length() != 11)
+            return false;
+
+        for (char c : str) {
+
+            if (!isdigit(c))
+                return false;
+        }
+
+        return true;
+    }
+
+    // =====================================================
+    // EMAIL VALIDATION
+    // =====================================================
+    bool validEmail(string str) {
+
+        return str.find('@') != string::npos
+            && str.find(".com") != string::npos;
+    }
+
+    // =====================================================
+    // INPUT PERSON DATA
+    // =====================================================
     virtual void inputPersonData() {
 
         cin.ignore();
 
-        cout << "Enter Name: ";
-        getline(cin, name);
+        // NAME
+        do {
 
-        cout << "Enter Phone: ";
-        getline(cin, phone);
+            cout << "Enter Name: ";
+            getline(cin, name);
 
-        cout << "Enter Email: ";
-        getline(cin, email);
+            if (!validName(name))
+                cout << "Invalid Name Enter Again\n";
 
-        cout << "Enter Country: ";
-        getline(cin, country);
+        } while (!validName(name));
 
-        cout << "Enter City: ";
-        getline(cin, city);
+        // PHONE
+        do {
+
+            cout << "Enter Phone: ";
+            getline(cin, phone);
+
+            if (!validPhone(phone))
+                cout << "Invalid Phone Number Enter Again\n";
+
+        } while (!validPhone(phone));
+
+        // EMAIL
+        do {
+
+            cout << "Enter Email: ";
+            getline(cin, email);
+
+            if (!validEmail(email))
+                cout << "Invalid Email Enter Again\n";
+
+        } while (!validEmail(email));
+
+        // COUNTRY
+        do {
+
+            cout << "Enter Country: ";
+            getline(cin, country);
+
+            if (!validName(country))
+                cout << "Invalid Country Enter Again\n";
+
+        } while (!validName(country));
+
+        // CITY
+        do {
+
+            cout << "Enter City: ";
+            getline(cin, city);
+
+            if (!validName(city))
+                cout << "Invalid City Enter Again\n";
+
+        } while (!validName(city));
     }
 
+    // =====================================================
+    // DISPLAY PERSON DATA
+    // =====================================================
     virtual void displayPersonData() {
 
         cout << left << setw(15)
@@ -82,7 +205,8 @@ public:
 // =========================================================
 class Customer : public Person {
 
-protected:
+private:
+
     string idNumber;
     string nationality;
 
@@ -94,34 +218,82 @@ public:
         nationality = "";
     }
 
+    // =====================================================
+    // CNIC VALIDATION
+    // =====================================================
+    bool validCNIC(string str) {
+
+        if (str.length() != 13)
+            return false;
+
+        for (char c : str) {
+
+            if (!isdigit(c))
+                return false;
+        }
+
+        return true;
+    }
+
+    // =====================================================
+    // PASSPORT VALIDATION
+    // =====================================================
+    bool validPassport(string str) {
+
+        return str.length() >= 6;
+    }
+
+    // =====================================================
+    // CUSTOMER INPUT
+    // =====================================================
     void inputCustomerData() {
 
         inputPersonData();
 
-        cout << "Enter Nationality: ";
-        getline(cin, nationality);
+        do {
 
-        // =================================================
+            cout << "Enter Nationality: ";
+            getline(cin, nationality);
+
+            if (nationality.empty())
+                cout << "Invalid Nationality Enter Again\n";
+
+        } while (nationality.empty());
+
         // PAKISTANI CUSTOMER
-        // =================================================
         if (nationality == "Pakistani" ||
             nationality == "pakistani" ||
             nationality == "PAKISTANI") {
 
-            cout << "Enter CNIC: ";
-            getline(cin, idNumber);
+            do {
+
+                cout << "Enter CNIC (13 Digits): ";
+                getline(cin, idNumber);
+
+                if (!validCNIC(idNumber))
+                    cout << "Invalid CNIC Enter Again\n";
+
+            } while (!validCNIC(idNumber));
         }
 
-        // =================================================
         // FOREIGN CUSTOMER
-        // =================================================
         else {
 
-            cout << "Enter Passport Number: ";
-            getline(cin, idNumber);
+            do {
+
+                cout << "Enter Passport Number: ";
+                getline(cin, idNumber);
+
+                if (!validPassport(idNumber))
+                    cout << "Invalid Passport Enter Again\n";
+
+            } while (!validPassport(idNumber));
         }
     }
 
+    // =====================================================
+    // DISPLAY CUSTOMER DATA
+    // =====================================================
     void displayCustomerData() {
 
         displayPersonData();
@@ -130,9 +302,6 @@ public:
              << "Nationality"
              << ": " << nationality << endl;
 
-        // =================================================
-        // SHOW CNIC OR PASSPORT
-        // =================================================
         if (nationality == "Pakistani" ||
             nationality == "pakistani" ||
             nationality == "PAKISTANI") {
@@ -157,9 +326,11 @@ public:
 class Room {
 
 protected:
+
     int roomNo;
     bool booked;
     int stayDays;
+    string bookingDate;
 
 public:
 
@@ -168,6 +339,7 @@ public:
         roomNo = 0;
         booked = false;
         stayDays = 0;
+        bookingDate = "";
     }
 
     virtual void setRoom(int no) {
@@ -179,36 +351,23 @@ public:
 
     virtual string getRoomType() = 0;
 
-    virtual void displayRoom() {
-
-        cout << left << setw(15)
-             << "Room Number"
-             << ": " << roomNo << endl;
-
-        cout << left << setw(15)
-             << "Room Type"
-             << ": " << getRoomType() << endl;
-
-        cout << left << setw(15)
-             << "Price"
-             << ": " << getPrice() << endl;
-    }
-
     bool isBooked() {
 
         return booked;
     }
 
-    void bookRoom(int days) {
+    void bookRoom(int days, string date) {
 
         booked = true;
         stayDays = days;
+        bookingDate = date;
     }
 
     void checkoutRoom() {
 
         booked = false;
         stayDays = 0;
+        bookingDate = "";
     }
 
     int getRoomNo() {
@@ -219,6 +378,11 @@ public:
     int getStayDays() {
 
         return stayDays;
+    }
+
+    string getBookingDate() {
+
+        return bookingDate;
     }
 
     virtual ~Room() {}
@@ -238,7 +402,7 @@ public:
 
     string getRoomType() override {
 
-        return "Single Room";
+        return "Single";
     }
 };
 
@@ -256,7 +420,7 @@ public:
 
     string getRoomType() override {
 
-        return "Double Room";
+        return "Double";
     }
 };
 
@@ -274,7 +438,7 @@ public:
 
     string getRoomType() override {
 
-        return "Deluxe Room";
+        return "Deluxe";
     }
 };
 
@@ -300,14 +464,10 @@ class Hotel {
 
 private:
 
-    static const int TOTAL_ROOMS = 100;
+    static const int TOTAL_ROOMS = 10;
 
     vector<Room*> rooms;
     vector<Customer> customers;
-
-    vector<string> feedbacks;
-
-    map<int, string> roomHistory;
 
 public:
 
@@ -317,10 +477,10 @@ public:
 
         for (int i = 0; i < TOTAL_ROOMS; i++) {
 
-            if (i < 30)
+            if (i < 3)
                 rooms.push_back(new SingleRoom());
 
-            else if (i < 70)
+            else if (i < 7)
                 rooms.push_back(new DoubleRoom());
 
             else
@@ -331,60 +491,53 @@ public:
     }
 
     // =====================================================
-    // CHECK ROOM AVAILABILITY
+    // ROOM STATUS
     // =====================================================
-    void checkAvailability() {
+    void roomStatus() {
 
-        cout << "\n========= AVAILABLE ROOMS =========\n";
+        cout << "\n====================================================================\n";
+
+        cout << left
+             << setw(10) << "Room No"
+             << setw(15) << "Room Type"
+             << setw(10) << "Price"
+             << setw(15) << "Status"
+             << setw(15) << "Book Date"
+             << endl;
+
+        cout << "====================================================================\n";
 
         for (Room* r : rooms) {
 
-            if (!r->isBooked()) {
+            cout << left
+                 << setw(10) << r->getRoomNo()
+                 << setw(15) << r->getRoomType()
+                 << setw(10) << r->getPrice();
 
-                cout << left << setw(15)
-                     << "Room No"
-                     << ": " << r->getRoomNo() << endl;
+            if (r->isBooked()) {
 
-                cout << left << setw(15)
-                     << "Type"
-                     << ": " << r->getRoomType() << endl;
-
-                cout << left << setw(15)
-                     << "Price"
-                     << ": " << r->getPrice() << endl;
-
-                cout << "----------------------------------\n";
+                cout << setw(15) << "Booked"
+                     << setw(15) << r->getBookingDate();
             }
+
+            else {
+
+                cout << setw(15) << "Available"
+                     << setw(15) << "-";
+            }
+
+            cout << endl;
         }
     }
 
     // =====================================================
-    // SMART ROOM RECOMMENDATION
+    // ROOM BOOKING
     // =====================================================
-    void smartRecommendation() {
-
-        int budget;
-
-        cout << "Enter Budget Per Day: ";
-        cin >> budget;
-
-        if (budget <= 3000)
-            cout << "Recommended : Single Room\n";
-
-        else if (budget <= 5000)
-            cout << "Recommended : Double Room\n";
-
-        else
-            cout << "Recommended : Deluxe Room\n";
-    }
-
-    // =====================================================
-    // ONLINE BOOKING
-    // =====================================================
-    void onlineBooking() {
+    void roomBooking() {
 
         int roomNo;
         int days;
+        string date;
 
         cout << "Enter Room Number: ";
         cin >> roomNo;
@@ -404,13 +557,24 @@ public:
         cout << "Enter Stay Days: ";
         cin >> days;
 
+        cin.ignore();
+
+        date = getCurrentDate();
+        string day  = getCurrentDay();
+
         customers[roomNo - 1].inputCustomerData();
 
-        rooms[roomNo - 1]->bookRoom(days);
+        rooms[roomNo - 1]->bookRoom(days, date);
 
-        roomHistory[roomNo] = "Booked";
+        cout << "\n====================================\n";
+        cout << "     ROOM BOOKED SUCCESSFULLY\n";
+        cout << "====================================\n";
 
-        cout << "\nBooking Successful\n";
+        cout << "Booking Date : "
+        << date << endl;
+
+        cout << "Booking Day  : "
+        << day << endl;
     }
 
     // =====================================================
@@ -438,8 +602,6 @@ public:
         BillGenerator::generateBill(*this, roomNo);
 
         rooms[roomNo - 1]->checkoutRoom();
-
-        roomHistory[roomNo] = "Checked Out";
 
         cout << "Checkout Successful\n";
     }
@@ -470,94 +632,6 @@ public:
     }
 
     // =====================================================
-    // ADD FEEDBACK
-    // =====================================================
-    void addFeedback() {
-
-        cin.ignore();
-
-        string feedback;
-
-        cout << "Enter Feedback: ";
-        getline(cin, feedback);
-
-        feedbacks.push_back(feedback);
-
-        cout << "Feedback Added Successfully\n";
-    }
-
-    // =====================================================
-    // SHOW FEEDBACKS
-    // =====================================================
-    void showFeedbacks() {
-
-        cout << "\n========= CUSTOMER FEEDBACKS =========\n";
-
-        int count = 1;
-
-        for (string feedback : feedbacks) {
-
-            cout << count << ". "
-                 << feedback << endl;
-
-            count++;
-        }
-    }
-
-    // =====================================================
-    // DISPLAY ALL ROOMS
-    // =====================================================
-    void displayAllRooms() {
-
-        cout << "\n========= ALL ROOMS =========\n";
-
-        for (Room* r : rooms) {
-
-            r->displayRoom();
-
-            if (r->isBooked())
-                cout << "Status : Booked\n";
-
-            else
-                cout << "Status : Available\n";
-
-            cout << "----------------------------------\n";
-        }
-    }
-
-    // =====================================================
-    // SORT ROOMS BY PRICE
-    // =====================================================
-    void sortRoomsByPrice() {
-
-        sort(rooms.begin(), rooms.end(),
-
-            [](Room* a, Room* b) {
-
-                return a->getPrice() < b->getPrice();
-            });
-
-        cout << "\nRooms Sorted By Price Successfully\n";
-    }
-
-    // =====================================================
-    // ROOM HISTORY
-    // =====================================================
-    void showRoomHistory() {
-
-        cout << "\n========= ROOM HISTORY =========\n";
-
-        for (auto data : roomHistory) {
-
-            cout << "Room "
-                 << data.first
-                 << " -> "
-                 << data.second
-                 << endl;
-        }
-    }
-
-    // =====================================================
     // FRIEND CLASS
     // =====================================================
     friend class BillGenerator;
@@ -581,7 +655,13 @@ void BillGenerator::generateBill(Hotel& h, int roomNo) {
 
     Room* r = h.rooms[roomNo - 1];
 
-    int total = r->getPrice() * r->getStayDays();
+    int roomCharges =
+        r->getPrice() * r->getStayDays();
+
+    int serviceCharges = 1000;
+
+    int total =
+        roomCharges + serviceCharges;
 
     cout << "\n====================================\n";
     cout << "             HOTEL BILL             \n";
@@ -603,6 +683,14 @@ void BillGenerator::generateBill(Hotel& h, int roomNo) {
          << "Stay Days"
          << ": " << r->getStayDays() << endl;
 
+    cout << left << setw(15)
+         << "Booking Date"
+         << ": " << r->getBookingDate() << endl;
+
+    cout << left << setw(15)
+         << "Service Fee"
+         << ": " << serviceCharges << endl;
+
     cout << "------------------------------------\n";
 
     cout << left << setw(15)
@@ -612,26 +700,58 @@ void BillGenerator::generateBill(Hotel& h, int roomNo) {
     cout << "====================================\n";
 }
 
+bool login()
+{
+    string username;
+    string password;
+
+    int attempts = 3;
+
+    while (attempts > 0)
+    {
+        cout << "\n========================================\n";
+        cout << "            ADMIN LOGIN\n";
+        cout << "========================================\n";
+
+        cout << "Username: ";
+        cin >> username;
+
+        cout << "Password: ";
+        cin >> password;
+
+        if (username == "admin" &&
+            password == "1234")
+        {
+            cout << "\nLogin Successful!\n";
+            return true;
+        }
+
+        attempts--;
+
+        cout << "\nInvalid Login!\n";
+        cout << "Remaining Attempts: "
+             << attempts << endl;
+    }
+
+    cout << "\nSystem Locked!\n";
+    return false;
+}
+
+
 // =========================================================
 //                  MENU
 // =========================================================
 void menu() {
 
     cout << "\n========================================\n";
-    cout << "      HOTEL MANAGEMENT SYSTEM           \n";
+    cout << "        HOTEL MANAGEMENT SYSTEM         \n";
     cout << "========================================\n";
 
-    cout << "1. Check Room Availability\n";
-    cout << "2. Smart Room Recommendation\n";
-    cout << "3. Online Booking\n";
-    cout << "4. Checkout Room\n";
-    cout << "5. Customer Details\n";
-    cout << "6. Add Feedback\n";
-    cout << "7. Show Feedbacks\n";
-    cout << "8. Display All Rooms\n";
-    cout << "9. Sort Rooms By Price\n";
-    cout << "10. Show Room History\n";
-    cout << "11. Exit\n";
+    cout << "1. Show All Rooms\n";
+    cout << "2. Room Booking\n";
+    cout << "3. Checkout Room\n";
+    cout << "4. Customer Details\n";
+    cout << "5. Exit\n";
 
     cout << "========================================\n";
 }
@@ -639,7 +759,12 @@ void menu() {
 // =========================================================
 //                  MAIN FUNCTION
 // =========================================================
-int main() {
+int main()
+{
+    if (!login())
+    {
+        return 0;
+    }
 
     Hotel h;
 
@@ -655,46 +780,22 @@ int main() {
         switch (choice) {
 
         case 1:
-            h.checkAvailability();
+            h.roomStatus();
             break;
 
         case 2:
-            h.smartRecommendation();
+            h.roomBooking();
             break;
 
         case 3:
-            h.onlineBooking();
-            break;
-
-        case 4:
             h.checkoutRoom();
             break;
 
-        case 5:
+        case 4:
             h.customerDetails();
             break;
 
-        case 6:
-            h.addFeedback();
-            break;
-
-        case 7:
-            h.showFeedbacks();
-            break;
-
-        case 8:
-            h.displayAllRooms();
-            break;
-
-        case 9:
-            h.sortRoomsByPrice();
-            break;
-
-        case 10:
-            h.showRoomHistory();
-            break;
-
-        case 11:
+        case 5:
             cout << "Thank You For Using System\n";
             break;
 
@@ -702,7 +803,8 @@ int main() {
             cout << "Invalid Choice\n";
         }
 
-    } while (choice != 11);
+    } while (choice != 5);
 
     return 0;
 }
+
